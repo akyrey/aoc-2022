@@ -7,8 +7,8 @@ fn main() {
     elves_calories.push(Vec::new());
     let mut index: usize = 0;
     // File hosts must exist in current path before this produces output
-    // if let Ok(lines) = read_lines("./src/bin/test_01_1.txt") {
-    if let Ok(lines) = read_lines("./src/bin/input_01_1.txt") {
+    // if let Ok(lines) = read_lines("./src/bin/test_01.txt") {
+        if let Ok(lines) = read_lines("./src/bin/input_01.txt") {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(ip) = line {
@@ -24,15 +24,22 @@ fn main() {
         }
     }
 
-    let max = elves_calories
+    let sum: i32 = elves_calories
         .iter()
         .map(|snack| snack.iter().sum())
-        .reduce(|acc: i32, item| if acc >= item { acc } else { item });
-    println!(
-        "Elves: {}, max calories: {}",
-        elves_calories.len(),
-        max.expect("Vector shouldn't be empty")
-    );
+        .fold(Vec::new(), |mut max_three, item: i32| {
+            let index = max_three
+                .iter()
+                .position(|&current| item > current)
+                .unwrap_or_else(|| max_three.len());
+
+            max_three.insert(index, item);
+
+            return max_three.into_iter().take(3).collect::<Vec<i32>>();
+        })
+        .into_iter()
+        .sum();
+    println!("Elves: {}, calories sum for top three: {}", elves_calories.len(), sum);
 }
 
 // The output is wrapped in a Result to allow matching on errors
