@@ -18,8 +18,10 @@ fn main() {
             if let Ok(ip) = line {
                 if !ip.is_empty() {
                     let strategy = ip.split(" ").collect::<Vec<&str>>();
-                    score =
-                        score + my_play_score(strategy[1]) + game_result(strategy[0], strategy[1]);
+                    let play_i_should_do = my_play(strategy[0], strategy[1]);
+                    score = score
+                        + my_play_score(&play_i_should_do)
+                        + game_result(strategy[0], &play_i_should_do);
                 }
             }
         }
@@ -40,19 +42,19 @@ where
 
 fn game_result(opponent_play: &str, my_play: &str) -> i32 {
     return match my_play {
-        "X" => match opponent_play {
+        "A" => match opponent_play {
             "A" => 3,
             "B" => 0,
             "C" => 6,
             _ => 0,
         },
-        "Y" => match opponent_play {
+        "B" => match opponent_play {
             "A" => 6,
             "B" => 3,
             "C" => 0,
             _ => 0,
         },
-        "Z" => match opponent_play {
+        "C" => match opponent_play {
             "A" => 0,
             "B" => 6,
             "C" => 3,
@@ -65,11 +67,30 @@ fn game_result(opponent_play: &str, my_play: &str) -> i32 {
 fn my_play_score(play: &str) -> i32 {
     return match play {
         // Choose Rock
-        "X" => 1,
+        "A" => 1,
         // Choose Paper
-        "Y" => 2,
+        "B" => 2,
         // Choose Scissor
-        "Z" => 3,
+        "C" => 3,
         _ => 0,
+    };
+}
+
+fn my_play(opponent_play: &str, result: &str) -> String {
+    return match result {
+        "X" => match opponent_play {
+            "A" => String::from("C"),
+            "B" => String::from("A"),
+            "C" => String::from("B"),
+            _ => String::from(""),
+        },
+        "Y" => opponent_play.to_string(),
+        "Z" => match opponent_play {
+            "A" => String::from("B"),
+            "B" => String::from("C"),
+            "C" => String::from("A"),
+            _ => String::from(""),
+        },
+        _ => String::from(""),
     };
 }
