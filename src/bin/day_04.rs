@@ -16,11 +16,7 @@ fn main() {
                 }
                 let first_assignment = get_sections(elves_assignments[0]);
                 let second_assignment = get_sections(elves_assignments[1]);
-                if (first_assignment.0 >= second_assignment.0
-                    && first_assignment.1 <= second_assignment.1)
-                    || (second_assignment.0 >= first_assignment.0
-                        && second_assignment.1 <= first_assignment.1)
-                {
+                if is_overlapping(first_assignment, second_assignment) {
                     contained_sets = contained_sets + 1;
                 }
             }
@@ -28,6 +24,25 @@ fn main() {
     }
     println!("Contained sets {}", contained_sets);
 }
+
+fn is_overlapping(first_assignment: (u32, u32), second_assignment: (u32, u32)) -> bool {
+    for first_value in first_assignment.0..(first_assignment.1 + 1) {
+        for second_value in second_assignment.0..(second_assignment.1 + 1) {
+            if first_value == second_value {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// fn is_contained(first_assignment: (u32, u32), second_assignment: (u32, u32)) -> bool {
+//     return (first_assignment.0 >= second_assignment.0
+//         && first_assignment.1 <= second_assignment.1)
+//         || (second_assignment.0 >= first_assignment.0
+//             && second_assignment.1 <= first_assignment.1);
+// }
 
 fn get_sections(value: &str) -> (u32, u32) {
     let array = value.split('-').collect::<Vec<&str>>();
