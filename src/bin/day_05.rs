@@ -89,10 +89,14 @@ fn main() {
 }
 
 fn perform_movement(stacks: &mut Vec<Stack<String>>, movement: Movement) {
+    let mut to_move = Vec::<String>::new();
     for _ in 0..movement.size {
         if let Some(moved) = stacks[movement.start].pop() {
-            stacks[movement.end].push(moved);
+            to_move.push(moved);
         }
+    }
+    for value in to_move.iter().rev() {
+        stacks[movement.end].push(value.clone());
     }
 }
 
