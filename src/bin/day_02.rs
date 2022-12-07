@@ -11,8 +11,8 @@ use std::path::Path;
 fn main() {
     let mut score = 0;
     // File hosts must exist in current path before this produces output
-    // if let Ok(lines) = read_lines("./src/bin/test_02.txt") {
-    if let Ok(lines) = read_lines("./src/bin/input_02.txt") {
+    // if let Ok(lines) = read_lines("./input/test_02.txt") {
+    if let Ok(lines) = read_lines("./input/input_02.txt") {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(ip) = line {

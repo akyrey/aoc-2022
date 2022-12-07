@@ -5,8 +5,8 @@ use std::path::Path;
 fn main() {
     let mut contained_sets = 0;
     // File hosts must exist in current path before this produces output
-    // if let Ok(lines) = read_lines("./src/bin/test_04.txt") {
-    if let Ok(lines) = read_lines("./src/bin/input_04.txt") {
+    // if let Ok(lines) = read_lines("./input/test_04.txt") {
+    if let Ok(lines) = read_lines("./input/input_04.txt") {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(ip) = line {

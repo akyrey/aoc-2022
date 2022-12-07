@@ -59,8 +59,8 @@ fn main() {
     let mut is_movement = false;
     let mut stacks = Vec::<Stack<String>>::new();
     // File hosts must exist in current path before this produces output
-    // if let Ok(lines) = read_lines("./src/bin/test_05.txt") {
-    if let Ok(lines) = read_lines("./src/bin/input_05.txt") {
+    // if let Ok(lines) = read_lines("./input/test_05.txt") {
+    if let Ok(lines) = read_lines("./input/input_05.txt") {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(ip) = line {

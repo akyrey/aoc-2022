@@ -7,8 +7,8 @@ fn main() {
     elves_calories.push(Vec::new());
     let mut index: usize = 0;
     // File hosts must exist in current path before this produces output
-    // if let Ok(lines) = read_lines("./src/bin/test_01.txt") {
-        if let Ok(lines) = read_lines("./src/bin/input_01.txt") {
+    // if let Ok(lines) = read_lines("./input/test_01.txt") {
+    if let Ok(lines) = read_lines("./input/input_01.txt") {
         // Consumes the iterator, returns an (Optional) String
         for line in lines {
             if let Ok(ip) = line {
@@ -39,7 +39,11 @@ fn main() {
         })
         .into_iter()
         .sum();
-    println!("Elves: {}, calories sum for top three: {}", elves_calories.len(), sum);
+    println!(
+        "Elves: {}, calories sum for top three: {}",
+        elves_calories.len(),
+        sum
+    );
 }
 
 // The output is wrapped in a Result to allow matching on errors
