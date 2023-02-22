@@ -7,6 +7,9 @@ use std::path::Path;
 use std::rc::Rc;
 use std::str::FromStr;
 
+const TOTAL_DISK_SIZE: u64 = 70_000_000;
+const UPDATE_SIZE: u64 = 30_000_000;
+
 enum Command {
     ChangeDirectory(String),
     List,
@@ -147,12 +150,23 @@ fn main() {
             }
         }
     }
-    println!("{root:#?}");
-    let sum = all_dirs(root)
+    // println!("{root:#?}");
+    let mut sizes = all_dirs(root)
         .map(|d| d.borrow().total_size())
-        .filter(|&s| s <= 100_000)
-        .sum::<u64>();
-    println!("Sum of all directories with a total size of at most 100_000: {sum:#?}");
+        .collect::<Vec<u64>>();
+    sizes.sort();
+    sizes.reverse();
+    if let Some((root_size, rest)) = sizes.split_first() {
+        let mut smallest_deletable_dir_size = &std::u64::MAX;
+        for size in rest {
+            if TOTAL_DISK_SIZE - root_size + size > UPDATE_SIZE
+                && size < smallest_deletable_dir_size
+            {
+                smallest_deletable_dir_size = size;
+            }
+        }
+        println!("Smallest deletable directory size: {smallest_deletable_dir_size:#?}");
+    }
 }
 
 // The output is wrapped in a Result to allow matching on errors
