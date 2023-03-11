@@ -20,19 +20,19 @@ impl Matrix {
 
 #[derive(Debug)]
 enum Direction {
-    Right,
-    Left,
-    Bottom,
     Top,
+    Left,
+    Right,
+    Bottom,
 }
 
 impl Direction {
     pub fn iterator() -> Iter<'static, Direction> {
         static DIRECTIONS: [Direction; 4] = [
-            Direction::Right,
-            Direction::Left,
-            Direction::Bottom,
             Direction::Top,
+            Direction::Left,
+            Direction::Right,
+            Direction::Bottom,
         ];
         DIRECTIONS.iter()
     }
@@ -42,12 +42,9 @@ fn main() {
     // let mut matrix: Matrix = Matrix::new(create_matrix("./input/test_08.txt"));
     let mut matrix: Matrix = Matrix::new(create_matrix("./input/input_08.txt"));
 
-    let visible_count: u32 = count_visible_trees(&mut matrix);
+    let scenic_score: usize = highest_scenic_score(&mut matrix);
 
-    println!(
-        "This is the matrix: {:?} has {} visible trees",
-        matrix, visible_count
-    );
+    println!("The highest scenic score is {}", scenic_score);
 }
 
 fn create_matrix(input_file: &str) -> Vec<Vec<u8>> {
@@ -70,82 +67,97 @@ fn create_matrix(input_file: &str) -> Vec<Vec<u8>> {
     return Vec::new();
 }
 
-fn count_visible_trees(matrix: &mut Matrix) -> u32 {
-    let mut sum: u32 = 0;
+fn highest_scenic_score(matrix: &mut Matrix) -> usize {
+    let mut scenic_scores: Vec<usize> = Vec::new();
 
     for col in 0..matrix.cols {
         for row in 0..matrix.rows {
-            if is_tree_visible(matrix, col, row) {
-                sum = sum + 1;
-            }
+            let scenic_score = count_tree_visible(matrix, col, row);
+            println!("Scenic score {}", scenic_score);
+            scenic_scores.push(scenic_score);
         }
     }
 
-    return sum;
+    match scenic_scores.iter().max() {
+        Some(&max) => max,
+        None => 0,
+    }
 }
 
-fn is_tree_visible(matrix: &mut Matrix, col: usize, row: usize) -> bool {
+fn count_tree_visible(matrix: &mut Matrix, col: usize, row: usize) -> usize {
     if col == 0 || row == 0 || col == matrix.cols - 1 || row == matrix.rows - 1 {
-        return true;
+        return 0;
     }
 
+    let mut count: usize = 1;
     for direction in Direction::iterator() {
-        if check_visible_from(matrix, col, row, direction) {
-            println!("{} visible", matrix.values[col][row]);
-            return true;
-        }
+        let visibles = count_visible_from(matrix, col, row, direction);
+        // println!("Viewing {} from {:?}", visibles, direction);
+        count *= visibles;
     }
 
-    println!("{} NOT visible", matrix.values[col][row]);
-    return false;
+    return count;
 }
 
-fn check_visible_from(matrix: &mut Matrix, col: usize, row: usize, direction: &Direction) -> bool {
+fn count_visible_from(matrix: &mut Matrix, col: usize, row: usize, direction: &Direction) -> usize {
     let current_tree_height = matrix.values[col][row];
     // println!("Compare {:?}", direction);
     match direction {
         Direction::Right => {
-            return ((row + 1)..(matrix.rows)).rev().fold(true, |acc, check| {
-                if acc && !is_visible(current_tree_height, matrix.values[col][check]) {
-                    return false;
-                }
-
-                return acc;
-            });
+            let mut first_equal_or_higher = true;
+            return ((row + 1)..(matrix.rows))
+                .take_while(|&check| {
+                    let result = first_equal_or_higher;
+                    if current_tree_height <= matrix.values[col][check] {
+                        first_equal_or_higher = false;
+                    }
+                    return result;
+                })
+                .collect::<Vec<usize>>()
+                .len();
         }
         Direction::Left => {
-            return (0..row).fold(true, |acc, check| {
-                if acc && !is_visible(current_tree_height, matrix.values[col][check]) {
-                    return false;
-                }
-
-                return acc;
-            });
+            let mut first_equal_or_higher = true;
+            return (0..row)
+                .rev()
+                .take_while(|&check| {
+                    let result = first_equal_or_higher;
+                    if current_tree_height <= matrix.values[col][check] {
+                        first_equal_or_higher = false;
+                    }
+                    return result;
+                })
+                .collect::<Vec<usize>>()
+                .len();
         }
         Direction::Bottom => {
-            return ((col + 1)..(matrix.cols)).rev().fold(true, |acc, check| {
-                if acc && !is_visible(current_tree_height, matrix.values[check][row]) {
-                    return false;
-                }
-
-                return acc;
-            });
+            let mut first_equal_or_higher = true;
+            return ((col + 1)..(matrix.cols))
+                .take_while(|&check| {
+                    let result = first_equal_or_higher;
+                    if current_tree_height <= matrix.values[check][row] {
+                        first_equal_or_higher = false;
+                    }
+                    return result;
+                })
+                .collect::<Vec<usize>>()
+                .len();
         }
         Direction::Top => {
-            return (0..col).fold(true, |acc, check| {
-                if acc && !is_visible(current_tree_height, matrix.values[check][row]) {
-                    return false;
-                }
-
-                return acc;
-            });
+            let mut first_equal_or_higher = true;
+            return (0..col)
+                .rev()
+                .take_while(|&check| {
+                    let result = first_equal_or_higher;
+                    if current_tree_height <= matrix.values[check][row] {
+                        first_equal_or_higher = false;
+                    }
+                    return result;
+                })
+                .collect::<Vec<usize>>()
+                .len();
         }
     }
-}
-
-fn is_visible(current_tree_height: u8, other_tree_height: u8) -> bool {
-    // println!("Compare {} with {}", current_tree_height, other_tree_height);
-    return current_tree_height > other_tree_height;
 }
 
 // The output is wrapped in a Result to allow matching on errors
