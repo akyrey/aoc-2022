@@ -2,78 +2,111 @@ use std::{collections::HashSet, str::FromStr};
 
 use anyhow::Result;
 
+const KNOTS: usize = 10;
 // const INPUT_FILE: &str = "./input/test_09.txt";
+// const INPUT_FILE: &str = "./input/test_09_2.txt";
 const INPUT_FILE: &str = "./input/input_09.txt";
 
-#[derive(Clone, Debug, Hash, Eq, PartialEq)]
-struct Point(i32, i32);
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
+struct Point {
+    x: i32,
+    y: i32,
+}
 
 impl Point {
     fn simple_move(&mut self, direction: &Direction) {
         match direction {
-            Direction::Up(m) => self.0 = self.0 - m,
-            Direction::Right(m) => self.1 = self.1 + m,
-            Direction::Down(m) => self.0 = self.0 + m,
-            Direction::Left(m) => self.1 = self.1 - m,
+            Direction::Up(m) => self.x = self.x - m,
+            Direction::Right(m) => self.y = self.y + m,
+            Direction::Down(m) => self.x = self.x + m,
+            Direction::Left(m) => self.y = self.y - m,
         };
     }
 
     fn distance(&self, other: &Self) -> f64 {
         return f64::sqrt(
-            f64::from((other.0 - self.0).pow(2)) + f64::from((other.1 - self.1).pow(2)),
+            f64::from((other.x - self.x).pow(2)) + f64::from((other.y - self.y).pow(2)),
         );
     }
 }
 
 #[derive(Clone, Debug)]
 struct Rope {
-    head: Point,
-    tail: Point,
+    knots: Vec<Point>,
     visited: HashSet<Point>,
 }
 
 impl Rope {
     fn new() -> Self {
         return Rope {
-            head: Point(0, 0),
-            tail: Point(0, 0),
-            visited: HashSet::from([Point(0, 0)]),
+            knots: vec![Point { x: 0, y: 0 }; KNOTS],
+            visited: HashSet::from([Point { x: 0, y: 0 }]),
         };
     }
 
-    fn follow_head(&mut self) {
-        while self.tail.distance(&self.head) >= 2.0 {
-            // Same x
-            if self.tail.0 == self.head.0 {
-                if self.head.1 > self.tail.1 {
-                    self.tail.1 += 1;
-                } else {
-                    self.tail.1 -= 1;
-                }
-            }
-            // Same y
-            else if self.tail.1 == self.head.1 {
-                if self.head.0 > self.tail.0 {
-                    self.tail.0 += 1;
-                } else {
-                    self.tail.0 -= 1;
-                }
+    fn follow_head(&mut self, direction: &Direction) {
+        let (coordinate, multiplier, count) = match direction {
+            Direction::Up(m) => (0, -1, m),
+            Direction::Right(m) => (1, 1, m),
+            Direction::Down(m) => (0, 1, m),
+            Direction::Left(m) => (1, -1, m),
+        };
+        for _ in 0..*count {
+            if coordinate == 0 {
+                self.knots[0].x += multiplier;
             } else {
-                if self.head.0 > self.tail.0 && self.head.1 > self.tail.1 {
-                    self.tail.0 += 1;
-                    self.tail.1 += 1;
-                } else if self.head.0 < self.tail.0 && self.head.1 < self.tail.1 {
-                    self.tail.0 -= 1;
-                    self.tail.1 -= 1;
-                } else if self.head.0 > self.tail.0 && self.head.1 < self.tail.1 {
-                    self.tail.0 += 1;
-                    self.tail.1 -= 1;
-                } else if self.head.0 < self.tail.0 && self.head.1 > self.tail.1 {
-                    self.tail.0 -= 1;
-                    self.tail.1 += 1;
+                self.knots[0].y += multiplier;
+            }
+            for i in 0..self.knots.len() - 1 {
+                while self.knots[i + 1].distance(&self.knots[i]) >= 2.0 {
+                    // Same x
+                    if self.knots[i + 1].x == self.knots[i].x {
+                        if self.knots[i].y > self.knots[i + 1].y {
+                            self.knots[i + 1].y += 1;
+                        } else {
+                            self.knots[i + 1].y -= 1;
+                        }
+                    }
+                    // Same y
+                    else if self.knots[i + 1].y == self.knots[i].y {
+                        if self.knots[i].x > self.knots[i + 1].x {
+                            self.knots[i + 1].x += 1;
+                        } else {
+                            self.knots[i + 1].x -= 1;
+                        }
+                    } else {
+                        if self.knots[i].x > self.knots[i + 1].x
+                            && self.knots[i].y > self.knots[i + 1].y
+                        {
+                            self.knots[i + 1].x += 1;
+                            self.knots[i + 1].y += 1;
+                        } else if self.knots[i].x < self.knots[i + 1].x
+                            && self.knots[i].y < self.knots[i + 1].y
+                        {
+                            self.knots[i + 1].x -= 1;
+                            self.knots[i + 1].y -= 1;
+                        } else if self.knots[i].x > self.knots[i + 1].x
+                            && self.knots[i].y < self.knots[i + 1].y
+                        {
+                            self.knots[i + 1].x += 1;
+                            self.knots[i + 1].y -= 1;
+                        } else if self.knots[i].x < self.knots[i + 1].x
+                            && self.knots[i].y > self.knots[i + 1].y
+                        {
+                            self.knots[i + 1].x -= 1;
+                            self.knots[i + 1].y += 1;
+                        }
+                    }
+                    let tail = self.knots[self.knots.len() - 1].clone();
+                    // if self.visited.get(&tail).is_none() {
+                    //     println!(
+                    //         "Tail visited: {:?}",
+                    //         self.knots[self.knots.len() - 1].clone()
+                    //     );
+                    // }
+                    self.visited.insert(tail);
                 }
             }
-            self.visited.insert(self.tail.clone());
         }
     }
 }
@@ -110,8 +143,9 @@ fn main() -> Result<()> {
         .lines()
         .filter_map(|x| x.parse::<Direction>().ok())
         .fold(Rope::new(), |mut acc, direction| {
-            acc.head.simple_move(&direction);
-            acc.follow_head();
+            // acc.knots[0].simple_move(&direction);
+            acc.follow_head(&direction);
+            // println!("Moved: {:?}", acc);
             return acc;
         });
 
