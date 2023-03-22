@@ -8,7 +8,7 @@ const INPUT_FILE: &str = "./input/input_10.txt";
 struct Program {
     cycle: i32,
     x: i32,
-    signal_strength: i32,
+    drawing: String,
 }
 
 impl Default for Program {
@@ -16,21 +16,24 @@ impl Default for Program {
         Self {
             cycle: 0,
             x: 1,
-            signal_strength: 0,
+            drawing: String::from("#"),
         }
     }
 }
 
 impl Program {
-    fn calc_signal_strength(&mut self) {
-        let armonized_cycle = self.cycle - 20;
-        if armonized_cycle == 0 || armonized_cycle % 40 == 0 {
-            let signal_strength = self.cycle * self.x;
-            self.signal_strength += signal_strength;
-            println!(
-                "Increment signal strength, current: {} = {} * {}, sum: {}",
-                signal_strength, self.cycle, self.x, self.signal_strength
-            );
+    fn draw_pixel(&mut self) {
+        let armonized_cycle = self.cycle % 40;
+        if self.cycle % 40 == 0 {
+            self.drawing.push_str("\n");
+        }
+        if self.x == armonized_cycle
+            || self.x - 1 == armonized_cycle
+            || self.x + 1 == armonized_cycle
+        {
+            self.drawing.push_str("#");
+        } else {
+            self.drawing.push_str(".");
         }
     }
 }
@@ -64,13 +67,13 @@ fn main() -> Result<()> {
         .filter_map(|x| x.parse::<Instruction>().ok())
         .fold(Program::default(), |mut acc, instruction| {
             acc.cycle += 1;
-            acc.calc_signal_strength();
+            acc.draw_pixel();
             match instruction {
                 Instruction::Addx(x) => {
                     acc.cycle += 1;
-                    acc.calc_signal_strength();
                     // println!("Current: {}, adding {}, new total: {}", acc.x, x, acc.x + x);
                     acc.x += x;
+                    acc.draw_pixel();
                 }
                 Instruction::Noop => (),
             };
@@ -78,7 +81,7 @@ fn main() -> Result<()> {
             return acc;
         });
 
-    println!("Signal strength sum: {}", res.signal_strength);
+    println!("{}", res.drawing);
 
     return Ok(());
 }
